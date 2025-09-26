@@ -4,7 +4,7 @@ import NetworkSelector from "./features/network/NetworkSelector";
 import WalletButtons from "./features/wallet/WalletButtons";
 import TaskForm from "./features/tasks/TaskForm";
 import TaskList from "./features/tasks/TaskList";
-import { loadTasks, addTask, updateStatus, deleteTask } from "./features/tasks/taskAPI";
+import { loadTasks, addTask, updateStatus, deleteTask, updateTask } from "./features/tasks/taskAPI";
 
 export default function App() {
   const { connectedAddress, contract, selectedNetwork, connectWallet, disconnectWallet, switchNetwork } = useWallet();
@@ -23,7 +23,7 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: "Arial, sans-serif", maxWidth: "900px", margin: "0 auto", padding: "25px" }}>
-      
+
       {/* Sélecteur de réseau */}
       <NetworkSelector selectedNetwork={selectedNetwork} switchNetwork={switchNetwork} />
 
@@ -61,13 +61,15 @@ export default function App() {
 
       {/* Liste des tâches */}
       <TaskList
-  tasks={tasks}
-  statuses={statuses}
-  updateStatus={(id, status) => updateStatus(contract, id, status, () => loadTasks(contract, setTasks))}
-  deleteTask={id => deleteTask(contract, id, setTasks)}
-  connectedAddress={connectedAddress} // <- Obligatoire !
-/>
-
+        tasks={tasks}
+        statuses={statuses}
+        updateStatus={(id, status) =>
+          updateStatus(contract, id, status, () => loadTasks(contract, setTasks))
+        }
+        deleteTask={id => deleteTask(contract, id, setTasks)}
+        connectedAddress={connectedAddress}
+        updateTask={task => updateTask(contract, task, setTasks, () => loadTasks(contract, setTasks))}
+      />
     </div>
   );
 }

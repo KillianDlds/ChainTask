@@ -70,3 +70,16 @@ export const deleteTask = async (contract, id, setTasks) => {
     console.error("Erreur deleteTask:", err);
   }
 };
+export const updateTask = async (contract, task, setTasks, loadTasksFunc) => {
+  if (!contract) return alert("Connecte ton wallet !");
+
+  try {
+    // On suppose que le contrat a une fonction updateTask(uint256 id, string title, string description, address[] collaborators)
+    const tx = await contract.updateTask(task.id, task.title, task.description, task.collaborators);
+    await tx.wait();
+    await loadTasksFunc();
+  } catch (err) {
+    console.error(err);
+    alert("Impossible de modifier la tâche !");
+  }
+};
