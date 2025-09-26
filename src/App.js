@@ -6,7 +6,7 @@ import Web3Modal from "web3modal";
 const TASK_MANAGER_ADDRESSES = {
   base: "0xc5c09c5a5052decc8af4e7c6a6f6f448e3d4a16c",
   celo: "0x92144ED262b25B77499D7c11209755354EdB9dfC",
-  celoMainnet: "0x000000000000000000000000000000000000cE10" // Remplace par l'adresse du contrat Celo Mainnet
+  celoMainnet: "0xf59db5d2e66436759a02bf4396ECCB1866C2bFfd" // Remplace par l'adresse du contrat Celo Mainnet
 };
 
 // ABI du contrat
@@ -119,7 +119,11 @@ export default function App() {
 
     const handleChainChanged = async (_chainId) => {
       let network = "base";
-      if (_chainId.toLowerCase() === CELO_CHAIN_ID.toLowerCase()) network = "celo";
+      if (_chainId.toLowerCase() === CELO_CHAIN_ID.toLowerCase()) {
+        network = "celo";
+      } else if (_chainId.toLowerCase() === CELO_MAINNET_CHAIN_ID.toLowerCase()) {
+        network = "celoMainnet";
+      }
       setSelectedNetwork(network);
 
       if (signer) await switchNetwork(network, signer);
