@@ -1,3 +1,5 @@
+import { truncateAddress } from "../../utils/truncateAddress";
+
 export default function WalletButtons({ connectedAddress, connectWallet, disconnectWallet }) {
   return !connectedAddress ? (
     <button
@@ -19,7 +21,7 @@ export default function WalletButtons({ connectedAddress, connectWallet, disconn
     </button>
   ) : (
     <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
-      <p style={{ margin: 0, fontWeight: "500" }}>Wallet: {connectedAddress}</p>
+      <p style={{ margin: 0, fontWeight: "500" }}>Wallet: {truncateAddress(connectedAddress)}</p>
       <button
         onClick={disconnectWallet}
         style={{

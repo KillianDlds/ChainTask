@@ -1,34 +1,71 @@
+// Charger les tâches
 export const loadTasks = async (contract, setTasks) => {
   if (!contract) return;
+
   try {
     const ids = await contract.getTaskIds();
     const tasksFetched = await Promise.all(
       ids.map(async (id) => {
-        const [taskId, title, description, creator, status] = await contract.getTask(id);
-        return { id: Number(taskId), title, description, creator, status: Number(status) };
+        const [taskId, title, description, creator, collaborators, status] = await contract.getTask(id);
+        return {
+          id: Number(taskId),
+          title,
+          description,
+          creator,
+          collaborators,
+          status: Number(status),
+        };
       })
     );
-    const validTasks = tasksFetched.filter(t => t.creator !== "0x0000000000000000000000000000000000000000");
+
+    // Ne garder que les tâches valides
+    const validTasks = tasksFetched.filter(
+      t => t.creator && t.creator !== "0x0000000000000000000000000000000000000000"
+    );
+
     setTasks(validTasks);
+
   } catch (err) {
     console.error("Erreur loadTasks:", err);
   }
 };
 
-export const addTask = async (contract, newTitle, newDescription, connectedAddress, setTasks, setNewTitle, setNewDescription) => {
-  if (!newTitle.trim() || !newDescription.trim()) return alert("Remplis titre + description !");
+
+// Ajouter une tâche
+export const addTask = async (
+  contract,
+  newTitle,
+  newDescription,
+  collaborators,
+  setTasks,
+  setNewTitle,
+  setNewDescription,
+  setCollaborators
+) => {
+  if (!newTitle || !newDescription) return alert("Titre + description requis");
   if (!contract) return alert("Connecte ton wallet !");
+
+  const collaboratorsArray = collaborators
+    .split(",")
+    .map((addr) => addr.trim())
+    .filter((addr) => addr);
+
   try {
-    const tx = await contract.addTask(newTitle, newDescription);
+    const tx = await contract.addTask(newTitle, newDescription, collaboratorsArray);
     await tx.wait();
-    setTasks(prev => [...prev, { id: Date.now(), title: newTitle, description: newDescription, creator: connectedAddress, status: 0 }]);
-    setNewTitle(""); setNewDescription("");
+
+    setNewTitle("");
+    setNewDescription("");
+    setCollaborators("");
+
+    await loadTasks(contract, setTasks);
   } catch (err) {
-    console.error("Erreur addTask:", err);
-    alert("Impossible d'ajouter la tâche sur ce réseau");
+    console.error(err);
+    alert("Impossible d'ajouter la tâche");
   }
 };
 
+// Mettre à jour le statut
 export const updateStatus = async (contract, id, status, loadTasksFunc) => {
   if (!contract) return alert("Connecte ton wallet !");
   try {
@@ -40,12 +77,13 @@ export const updateStatus = async (contract, id, status, loadTasksFunc) => {
   }
 };
 
+// Supprimer une tâche
 export const deleteTask = async (contract, id, setTasks) => {
   if (!contract) return alert("Connecte ton wallet !");
   try {
     const tx = await contract.deleteTask(id);
     await tx.wait();
-    setTasks(prev => prev.filter(t => t.id !== id));
+    setTasks((prev) => prev.filter((t) => t.id !== id));
   } catch (err) {
     console.error("Erreur deleteTask:", err);
   }

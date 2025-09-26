@@ -10,12 +10,19 @@ export const useWallet = () => {
   const [signer, setSigner] = useState(null);
   const [contract, setContract] = useState(null);
   const [selectedNetwork, setSelectedNetwork] = useState("base");
+  const [hasDisconnected, setHasDisconnected] = useState(false);
+
 
   const connectWallet = async () => {
     if (!window.ethereum) return alert("Installe MetaMask !");
     try {
       const web3Modal = new Web3Modal();
-      const connection = await web3Modal.connect();
+
+      if (hasDisconnected) {
+        web3Modal.clearCachedProvider();
+      }
+      
+      const connection = await web3Modal.connect(); 
       const prov = new ethers.BrowserProvider(connection);
       const signerInstance = await prov.getSigner();
       const address = await signerInstance.getAddress();
@@ -23,14 +30,16 @@ export const useWallet = () => {
       setProvider(prov);
       setSigner(signerInstance);
       setConnectedAddress(address);
+      setHasDisconnected(false); // reset
 
       await switchNetwork(selectedNetwork, signerInstance);
-
       localStorage.setItem("connectedWallet", address);
     } catch (err) {
       console.error("Erreur connexion wallet:", err);
     }
   };
+
+
 
   const disconnectWallet = () => {
     localStorage.removeItem("connectedWallet");
@@ -38,7 +47,9 @@ export const useWallet = () => {
     setSigner(null);
     setConnectedAddress(null);
     setContract(null);
+    setHasDisconnected(true);
   };
+
 
   const switchNetwork = async (network, signerInstance = signer) => {
     if (!window.ethereum) return alert("MetaMask non détecté !");
@@ -85,7 +96,7 @@ export const useWallet = () => {
 
   useEffect(() => {
     const autoConnect = async () => {
-      if (localStorage.getItem("connectedWallet") && window.ethereum) {
+      if (!hasDisconnected && localStorage.getItem("connectedWallet") && window.ethereum) {
         try {
           const prov = new ethers.BrowserProvider(window.ethereum);
           const signerInstance = await prov.getSigner();
@@ -102,7 +113,9 @@ export const useWallet = () => {
       }
     };
     autoConnect();
-  }, [selectedNetwork]);
+  }, [selectedNetwork, hasDisconnected]);
+
+
 
   useEffect(() => {
     if (!window.ethereum) return;
