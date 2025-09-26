@@ -61,11 +61,13 @@ export default function App() {
 
       {/* Liste des tâches */}
       <TaskList
-        tasks={tasks}
-        statuses={statuses}
-        updateStatus={(id, status) => updateStatus(contract, id, status, () => loadTasks(contract, setTasks))}
-        deleteTask={(id) => deleteTask(contract, id, setTasks)}
-      />
+  tasks={tasks}
+  statuses={statuses}
+  updateStatus={(id, status) => updateStatus(contract, id, status, () => loadTasks(contract, setTasks))}
+  deleteTask={id => deleteTask(contract, id, setTasks)}
+  connectedAddress={connectedAddress} // <- Obligatoire !
+/>
+
     </div>
   );
 }
