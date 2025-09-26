@@ -213,14 +213,20 @@ export default function App() {
     try {
       const tx = await contract.addTask(newTitle, newDescription);
       await tx.wait();
+
+      setTasks(prevTasks => [
+        ...prevTasks,
+        { id: Date.now(), title: newTitle, description: newDescription, creator: connectedAddress, status: 0 }
+      ]);
+
       setNewTitle("");
       setNewDescription("");
-      await loadTasks(contract);
     } catch (err) {
       console.error("Erreur addTask:", err);
       alert("Impossible d'ajouter la tâche sur ce réseau");
     }
   };
+
 
   // Mettre à jour statut
   const updateStatus = async (id, status) => {
@@ -236,17 +242,17 @@ export default function App() {
 
   // Supprimer tâche
   const deleteTask = async (id) => {
-  if (!contract) return alert("Connecte ton wallet !");
-  try {
-    const tx = await contract.deleteTask(id);
-    await tx.wait();
+    if (!contract) return alert("Connecte ton wallet !");
+    try {
+      const tx = await contract.deleteTask(id);
+      await tx.wait();
 
-    // Mise à jour immédiate de la liste des tâches côté front
-    setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
-  } catch (err) {
-    console.error("Erreur deleteTask:", err);
-  }
-};
+      // Mise à jour immédiate de la liste des tâches côté front
+      setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
+    } catch (err) {
+      console.error("Erreur deleteTask:", err);
+    }
+  };
 
   return (
     <div style={{ fontFamily: "Arial, sans-serif", maxWidth: 900, margin: "0 auto", padding: 20 }}>
