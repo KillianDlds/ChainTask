@@ -50,8 +50,8 @@ const CELO_MAINNET_PARAMS = {
 export default function App() {
   const [selectedNetwork, setSelectedNetwork] = useState("base");
   const [tasks, setTasks] = useState([]);
-  const [newTitle, setNewTitle] = useState("");
-  const [newDescription, setNewDescription] = useState("");
+  const [newTitle, setTitle] = useState("");
+  const [newDescription, setDescription] = useState("");
   const [connectedAddress, setConnectedAddress] = useState(null);
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
@@ -219,8 +219,8 @@ export default function App() {
         { id: Date.now(), title: newTitle, description: newDescription, creator: connectedAddress, status: 0 }
       ]);
 
-      setNewTitle("");
-      setNewDescription("");
+      setTitle("");
+      setDescription("");
     } catch (err) {
       console.error("Erreur addTask:", err);
       alert("Impossible d'ajouter la tâche sur ce réseau");
@@ -297,13 +297,13 @@ export default function App() {
           type="text"
           placeholder="Titre..."
           value={newTitle}
-          onChange={(e) => setNewTitle(e.target.value)}
+          onChange={(e) => setTitle(e.target.value)}
           style={{ padding: 10, fontSize: 16, borderRadius: 5, border: "1px solid #ccc" }}
         />
         <textarea
           placeholder="Description..."
           value={newDescription}
-          onChange={(e) => setNewDescription(e.target.value)}
+          onChange={(e) => setDescription(e.target.value)}
           style={{ padding: 10, fontSize: 16, borderRadius: 5, border: "1px solid #ccc", minHeight: 80 }}
         />
         <button
