@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import Web3Modal from "web3modal";
 
 // ⚡ Adresse réelle de ton contrat déployé (modifie-la si besoin)
-const TASK_MANAGER_ADDRESS = "0x92144ED262b25B77499D7c11209755354EdB9dfC";
+const TASK_MANAGER_ADDRESS = "0xc5c09c5a5052decc8af4e7c6a6f6f448e3d4a16c";
 
 // ⚡ ABI du contrat avec title + description
 const TASK_MANAGER_ABI = [
@@ -33,6 +33,41 @@ export default function App() {
       if (!window.ethereum) return alert("Installe MetaMask !");
       const web3Modal = new Web3Modal();
       const connection = await web3Modal.connect();
+
+      // Vérifie et switch sur Base Sepolia si besoin
+      const baseSepoliaChainId = "0x14a34"; // 84532 en décimal
+      const baseSepoliaParams = {
+        chainId: baseSepoliaChainId,
+        chainName: "Base Sepolia Testnet",
+        nativeCurrency: {
+          name: "Ethereum",
+          symbol: "ETH",
+          decimals: 18,
+        },
+        rpcUrls: ["https://sepolia.base.org"],
+        blockExplorerUrls: ["https://sepolia.basescan.org"],
+      };
+
+      // Demande le switch si le réseau n'est pas Base Sepolia
+      const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
+      if (currentChainId !== baseSepoliaChainId) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: baseSepoliaChainId }],
+          });
+        } catch (switchError) {
+          // Si le réseau n'est pas ajouté, on l'ajoute
+          if (switchError.code === 4902) {
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [baseSepoliaParams],
+            });
+          } else {
+            throw switchError;
+          }
+        }
+      }
 
       const prov = new ethers.BrowserProvider(connection);
       const signer = await prov.getSigner();
